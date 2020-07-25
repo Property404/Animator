@@ -1,0 +1,29 @@
+*{
+	box-sizing:border-box;
+}
+
+html,body
+{
+	margin:0;
+	padding:0;
+	height:100%;
+	width:100%;
+}
+body{
+	background-color:grey;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+}
+#canvas-stack{
+	position:relative;
+	background-color:white;
+	border: 4px black solid;
+	height:auto;
+	display:flex;
+}
+.layer{
+	position:absolute;
+	top:0;
+	left:0;
+}
