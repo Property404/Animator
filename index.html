@@ -2,17 +2,45 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title></title>
+	<title>Animator</title>
 	<link rel="stylesheet" href="style.css">
 	<script src="app.js" type="module"></script>
 </head>
 <body>
-	<div id="canvas-stack">
-	<!--null-layer is to hold the canvas stack together-->
-	<canvas id="not-a-layer" width="800" height="600"></canvas>
 
-	<canvas id="layer1" class="layer" width="800" height="600"></canvas>
-	<canvas id="layer2" class="layer" width="800" height="600"></canvas>
+	<div id="sheet-view">
+	<!-- not-a-sheet is to hold the sheet stack together-->
+	<canvas id="not-a-sheet" width="800" height="600"></canvas>
+	</div>
+
+	<div id="keyframe-set-view">
+	</div>
+
+	<div id="keyframe-states" hidden>
+	</div>
+
+	<div id="templates" hidden>
+		<canvas id="keyframe-state-template" class="keyframe-state"
+											 width="800" height="600" hidden></canvas>
+
+		<canvas id="sheet-template" class="sheet" width="800" height="600"></canvas>
+
+		<div id="keyframe-template" class="keyframe">
+			&deg;
+		</div>
+
+		<div id="keyframe-set-template" class="keyframe-set" hidden>
+			<div class="keyframe-set-label">
+				Layer 1
+			</div>
+			<div class="keyframe-set-actions">
+				<button class="keyframe-set-action-hide">0</button>
+				<button class="keyframe-set-action-new">+</button>
+			</div>
+			<div class="keyframes">
+			</div>
+		</div>
+
 	</div>
 </body>
 </html>
