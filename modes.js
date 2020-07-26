@@ -47,7 +47,6 @@ export class PenMode extends Mode
 
 	_startDrawing(e)
 	{
-		console.log("START");
 		sheet_view.onmouseup = this._stopDrawing.bind(this);
 		sheet_view.onmousemove = this._draw.bind(this);
 		this._oldx = null;

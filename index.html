@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<meta name="description" content="Simple online 2D animation program">
+	<meta name="author" content="Dagan Martinez">
+	<meta name="referrer" content="same-origin">
+	<meta name="keywords" content="animate, paint, draw, online, animation">
 	<title>Animator</title>
 	<link rel="stylesheet" href="style.css">
 	<script src="app.js" type="module"></script>
@@ -16,7 +20,12 @@
 	<div id="keyframe-set-view">
 	</div>
 
-	<div id="keyframe-states" hidden>
+	<div id="timeline">
+		<div id="keyframe-states" hidden>
+		</div>
+		<div id="timeline-bottombar">
+			<button id="actionbutton-new-layer">+</button>
+		</div>
 	</div>
 
 	<div id="templates" hidden>

@@ -8,11 +8,22 @@ class Keyframe
 	constructor(mother, length=1)
 	{
 		this._length = length;
-		this._mother = mother;
+		this.mother = mother;
 		this._element = cloneFromTemplate(
 			"#keyframe-template",
 			`#${mother.keyframe_set.id} .keyframes`
 		);
+
+		this._element.onclick = e=>{
+			this.mother.
+				action_keyframe_select_callback.
+					call(this);
+		}
+	}
+
+	get slot()
+	{
+		return this.mother.getTimeSlotOfKeyframe(this);
 	}
 
 	get length()
@@ -29,14 +40,15 @@ class Keyframe
 
 	load(canvas)
 	{
-		this._mother.getContext().clearRect(0,0,
-			this._mother.sheet.width,
-			this._mother.sheet.height);
+		this.mother.getContext().clearRect(0,0,
+			this.mother.sheet.width,
+			this.mother.sheet.height);
 
 		if(this._state)
 		{
-			Keyframe.cloneCanvas(this._state, this._mother.sheet);
+			Keyframe.cloneCanvas(this._state, this.mother.sheet);
 		}
+
 	}
 
 	save()
@@ -46,7 +58,17 @@ class Keyframe
 			this._state = cloneFromTemplate("#keyframe-state-template",
 					"#keyframe-states");
 		}
-		Keyframe.cloneCanvas(this._mother.sheet, this._state);
+		Keyframe.cloneCanvas(this.mother.sheet, this._state);
+	}
+
+	highlight()
+	{
+		this._element.classList.add("active");
+	}
+
+	dehighlight()
+	{
+		this._element.classList.remove("active");
 	}
 }
 
@@ -69,10 +91,13 @@ export class Layer
 			querySelector(".keyframe-set-label").textContent = this.name;
 		this.keyframe_set.
 			querySelector(".keyframe-set-action-hide").onclick=
-				this._action_hide_callback.bind(this);
+				e=>this.action_hide_callback.call(this);
 		this.keyframe_set.
 			querySelector(".keyframe-set-action-new").onclick=
-				this._action_new_callback.bind(this);
+				e=>this.action_new_callback.call(this);
+		this.keyframe_set.
+			querySelector(".keyframe-set-label").onclick=
+				e=>this.action_select_callback.call(this);
 		this.keyframe_set.id = randomId();
 
 		this.addKeyframe();
@@ -80,28 +105,38 @@ export class Layer
 		this.switchToTimeSlot(time_slot);
 	}
 
-	_action_hide_callback(e)
+	// Get total length of keyframes
+	get length()
 	{
-		if(this.isHidden())
+		let len=0;
+		for(let i=0; i<this._keyframes.length;i++)
 		{
-			this.show();
+			len += this._keyframes[i].length;
 		}
-		else
-		{
-			this.hide();
-		}
+		return len;
 	}
 
-	_action_new_callback(e)
-	{
-		this.addKeyframe();
-	}
+
 
 	getContext()
 	{
 		if(!this._context)
 			this._context = this.sheet.getContext('2d');
 		return this._context;
+	}
+
+	getTimeSlotOfKeyframe(keyframe)
+	{
+		let t=0;
+		for(let i=0; i<this._keyframes.length;i++)
+		{
+			if(keyframe === this._keyframes[i])
+			{
+				return t;
+			}
+			t += this._keyframes[i].length;
+		}
+		throw new Error("Couldn't find keyframe");
 	}
 
 	getKeyframeAt(time_slot)
@@ -156,5 +191,15 @@ export class Layer
 	show()
 	{
 		this.sheet.removeAttribute("hidden");
+	}
+
+	highlight()
+	{
+		this.keyframe_set.classList.add("active");
+	}
+
+	dehighlight()
+	{
+		this.keyframe_set.classList.remove("active");
 	}
 }

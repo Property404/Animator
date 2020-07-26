@@ -1,6 +1,10 @@
 *{
 	box-sizing:border-box;
 }
+button:hover
+{
+	cursor:pointer;
+}
 
 html,body
 {
@@ -10,7 +14,7 @@ html,body
 	width:100%;
 }
 body{
-	background-color:grey;
+	background-color:lightgrey;
 	display:flex;
 	justify-content:center;
 	align-items:center;
@@ -20,7 +24,7 @@ body{
 #sheet-view{
 	position:relative;
 	background-color:white;
-	border: 4px black solid;
+	border: 2px rgba(0,0,0,.2) solid;
 	height:auto;
 	display:flex;
 }
@@ -38,16 +42,14 @@ body{
 #keyframe-set-view
 {
 	background-color:silver;
+	overflow-y:scroll;
 	width:100%;
 }
 .keyframe-set
 {
 	border:1px solid black;
 }
-.keyframe-set.active
-{
-	background-color:lightblue;
-}
+
 
 .keyframe
 {
@@ -66,4 +68,28 @@ body{
 	padding:0;
 	margin:0;
 	background-color:transparent;
+}
+
+#timeline
+{
+	width:100%;
+	display:flex;
+	flex-direction:column;
+	justify-content:end;
+}
+
+#timeline-bottombar
+{
+	width:100%;
+	background-color:#666;
+}
+#timeline-bottombar button
+{
+	background-color:#ccc;
+	border:none;
+}
+
+.active
+{
+	background-color:lightblue;
 }
