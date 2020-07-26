@@ -1,13 +1,33 @@
+import {absoluteToCanvas} from "./utils.js";
 import {Layer} from "./Layer.js";
 const layer = new Layer(0);
-let slot = 0;
-layer.switchToTimeSlot(slot);
-
 const context = layer.getContext();
 
-document.onmousemove = e=>
+let slot=0;
+let oldx=null;
+let oldy= null
+
+
+document.onmouseup = e=>{
+	oldx=null;
+	oldy=null;
+	document.onmousemove = null;
+}
+document.onmousedown = e=>
 {
-	context.fillRect(e.clientX-5, e.clientY-5,10,10);
+	document.onmousemove = e=>
+	{
+		const [newx, newy] = absoluteToCanvas(e.clientX,e.clientY);
+		if(oldx && oldy)
+		{
+			context.beginPath();
+			context.moveTo(oldx, oldy);
+			context.lineTo(newx, newy);
+			context.stroke();
+		}
+		oldx = newx;
+		oldy = newy;
+	}
 }
 
 document.onkeydown = e=>
