@@ -38,6 +38,5 @@ export function absoluteToCanvas(absolute_x, absolute_y)
 	if(!_canvas)
 		_canvas = document.getElementById("not-a-sheet");
 	const bbox = _canvas.getBoundingClientRect();
-	console.log(absolute_x-bbox.left);
 	return [absolute_x-bbox.left, absolute_y-bbox.top];
 }

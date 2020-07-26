@@ -1,33 +1,22 @@
-import {absoluteToCanvas} from "./utils.js";
+import {PenMode, EraseMode} from "./modes.js";
 import {Layer} from "./Layer.js";
 const layer = new Layer(0);
 const context = layer.getContext();
 
 let slot=0;
-let oldx=null;
-let oldy= null
 
-
-document.onmouseup = e=>{
-	oldx=null;
-	oldy=null;
-	document.onmousemove = null;
-}
-document.onmousedown = e=>
+const modes =
 {
-	document.onmousemove = e=>
+	"pen":new PenMode(layer),
+	"erase": new EraseMode(layer)
+}
+function switchToMode(mode_name)
+{
+	for(const mode in modes)
 	{
-		const [newx, newy] = absoluteToCanvas(e.clientX,e.clientY);
-		if(oldx && oldy)
-		{
-			context.beginPath();
-			context.moveTo(oldx, oldy);
-			context.lineTo(newx, newy);
-			context.stroke();
-		}
-		oldx = newx;
-		oldy = newy;
+		modes[mode].deactivate();
 	}
+	modes[mode_name].activate();
 }
 
 document.onkeydown = e=>
@@ -38,4 +27,17 @@ document.onkeydown = e=>
 		slot%=layer._keyframes.length;
 		layer.switchToTimeSlot(slot);
 	}
+
+	if(e.key === "e")
+	{
+		console.log("ERASE");
+		switchToMode("erase");
+	}
+	if(e.key === "p")
+	{
+		console.log("PEN");
+		switchToMode("pen");
+	}
 }
+
+switchToMode("pen");

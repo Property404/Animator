@@ -23,6 +23,7 @@ class Keyframe
 	static cloneCanvas(old_canvas, new_canvas)
 	{
 		const ctx = new_canvas.getContext('2d');
+		ctx.clearRect(0,0,new_canvas.width,new_canvas.height);
 		ctx.drawImage(old_canvas, 0, 0);
 	}
 
@@ -103,7 +104,7 @@ export class Layer
 		return this._context;
 	}
 
-	_getKeyframeAssociatedWithTimeSlot(time_slot)
+	getKeyframeAt(time_slot)
 	{
 		if(
 			time_slot === null||
@@ -113,9 +114,7 @@ export class Layer
 		let t=0;
 		for(let i=0; i<this._keyframes.length;i++)
 		{
-			console.log(this._keyframes[i]);
 			t += this._keyframes[i].length;
-			console.log(t);
 			if(t > time_slot)
 			{
 				return this._keyframes[i];
@@ -130,11 +129,9 @@ export class Layer
 			throw new Error("Improper arguments");
 
 		const old_keyframe =
-			this._getKeyframeAssociatedWithTimeSlot(
-				this._current_time_slot);
+			this.getKeyframeAt(this._current_time_slot);
 		const new_keyframe = 
-			this._getKeyframeAssociatedWithTimeSlot(
-				time_slot);
+			this.getKeyframeAt(time_slot);
 
 		old_keyframe?.save();
 		new_keyframe?.load()
