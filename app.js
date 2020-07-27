@@ -31,7 +31,8 @@ function addLayer()
 
 	layer.action_new_callback = function(e)
 	{
-		this.addKeyframe();
+		const kf = this.addKeyframe();
+		switchToTimeSlot(kf.slot);
 	}
 
 	layer.action_select_callback = function(e)
@@ -104,7 +105,6 @@ document.onkeydown = e=>
 		let length = 0;
 		for(const layer of layers)
 			length = length > layer.length?length:layer.length;
-		console.log(length);
 		current_slot++;
 		current_slot%=length;
 		switchToTimeSlot(current_slot);
@@ -117,6 +117,15 @@ document.onkeydown = e=>
 	if(e.key === "p")
 	{
 		switchToMode("pen");
+	}
+	console.log(e.key);
+	if(e.key === "Delete")
+	{
+		if(current_keyframe)
+		{
+			current_layer.removeKeyframe(current_keyframe);
+			switchToTimeSlot(current_slot);
+		}
 	}
 }
 

@@ -70,6 +70,12 @@ class Keyframe
 	{
 		this._element.classList.remove("active");
 	}
+
+	destroy()
+	{
+		this._element.remove();
+		this._state.remove();
+	}
 }
 
 export class Layer
@@ -115,8 +121,6 @@ export class Layer
 		}
 		return len;
 	}
-
-
 
 	getContext()
 	{
@@ -175,7 +179,25 @@ export class Layer
 
 	addKeyframe()
 	{
-		this._keyframes.push(new Keyframe(this));
+		const kf = new Keyframe(this);
+		this._keyframes.push(kf);
+		return kf;
+	}
+
+	removeKeyframe(kf)
+	{
+		// Save
+		this.getKeyframeAt(this._current_time_slot)?.save();
+
+		kf.destroy();
+		const index = this._keyframes.indexOf(kf);
+		console.log(index);
+		this._keyframes.splice(index,1);
+		console.log(this._keyframes);
+
+		// Restore
+		this.getContext().clearRect(0,0,this.sheet.width, this.sheet.height);
+		this.getKeyframeAt(this._current_time_slot)?.load();
 	}
 
 	isHidden()
