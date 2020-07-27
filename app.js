@@ -1,4 +1,4 @@
-import {PenMode, EraseMode} from "./modes.js";
+import {PenMode, EraseMode, FillMode} from "./modes.js";
 import {Layer} from "./Layer.js";
 const layers = [];
 let current_slot=0;
@@ -8,7 +8,8 @@ let current_mode = null;
 const modes =
 {
 	"pen":new PenMode(current_layer),
-	"erase": new EraseMode(current_layer)
+	"erase": new EraseMode(current_layer),
+	"fill": new FillMode(current_layer)
 }
 
 
@@ -113,6 +114,10 @@ document.onkeydown = e=>
 	if(e.key === "e")
 	{
 		switchToMode("erase");
+	}
+	if(e.key === "f")
+	{
+		switchToMode("fill");
 	}
 	if(e.key === "p")
 	{
