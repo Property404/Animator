@@ -70,6 +70,11 @@ class Mode
 	{
 		this.context = this.active_layer.getContext();
 	}
+
+	storeRecord()
+	{
+		this.active_layer.getCurrentKeyframe().save();
+	}
 }
 
 // Draw lines, like a pen or pencil
@@ -94,6 +99,7 @@ export class PenMode extends Mode
 		sheet_view.onmousemove = this._draw.bind(this);
 		this._oldx = null;
 		this._oldy = null;
+		this.storeRecord();
 	}
 
 	_stopDrawing(e)
@@ -204,6 +210,8 @@ export class FillMode extends Mode
 		{
 			return;
 		}
+
+		this.storeRecord();
 
 		const canvas_width = not_a_sheet.width;
 		const canvas_height = not_a_sheet.height;

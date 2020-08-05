@@ -123,6 +123,10 @@ document.onkeydown = e=>
 	{
 		switchToMode("pen");
 	}
+	if(e.key === "z")
+	{
+		current_layer.getCurrentKeyframe().load();
+	}
 	console.log(e.key);
 	if(e.key === "Delete")
 	{

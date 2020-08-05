@@ -2,8 +2,8 @@ import {randomId, cloneFromTemplate} from "./utils.js";
 
 class Keyframe
 {
-	_state = null;
 	_element = null;
+	_record = []
 
 	constructor(mother, length=1)
 	{
@@ -31,34 +31,23 @@ class Keyframe
 		return this._length;
 	}
 
-	static cloneCanvas(old_canvas, new_canvas)
-	{
-		const ctx = new_canvas.getContext('2d');
-		ctx.clearRect(0,0,new_canvas.width,new_canvas.height);
-		ctx.drawImage(old_canvas, 0, 0);
-	}
-
 	load(canvas)
 	{
-		this.mother.getContext().clearRect(0,0,
-			this.mother.sheet.width,
-			this.mother.sheet.height);
+		const sheet = this.mother.sheet;
+		const ctx = this.mother.getContext();
+		const record = this._record.pop();
+		ctx.clearRect(0,0,sheet.width,sheet.height);
 
-		if(this._state)
-		{
-			Keyframe.cloneCanvas(this._state, this.mother.sheet);
-		}
+		if(!record)return;
+		ctx.putImageData(record, 0,0);
 
 	}
 
 	save()
 	{
-		if(!this._state)
-		{
-			this._state = cloneFromTemplate("#keyframe-state-template",
-					"#keyframe-states");
-		}
-		Keyframe.cloneCanvas(this.mother.sheet, this._state);
+		const sheet = this.mother.sheet;
+		const ctx = this.mother.getContext();
+		this._record.push(ctx.getImageData(0, 0, sheet.width, sheet.height));
 	}
 
 	highlight()
@@ -74,7 +63,6 @@ class Keyframe
 	destroy()
 	{
 		this._element.remove();
-		this._state.remove();
 	}
 }
 
@@ -127,6 +115,11 @@ export class Layer
 		if(!this._context)
 			this._context = this.sheet.getContext('2d');
 		return this._context;
+	}
+
+	getCurrentKeyframe()
+	{
+		return this.getKeyframeAt(this._current_time_slot);
 	}
 
 	getTimeSlotOfKeyframe(keyframe)
