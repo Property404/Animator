@@ -8,11 +8,53 @@ import {absoluteToCanvas} from "./utils.js";
 const sheet_view = document.getElementById("sheet-view");
 const not_a_sheet = document.getElementById("not-a-sheet");
 
+class Color
+{
+	constructor(r,g,b,a)
+	{
+		const list = [r,g,b,a];
+		for(let i=0;i<4;i++)
+		{
+			if(
+				list[i] === null ||
+				list[i] === undefined ||
+				list[i] > 255 || 
+				list[i] < 0
+			)
+				throw new Error("Invalid constructor arguments for Color");
+		}
+
+		this.red = r;
+		this.green = g;
+		this.blue = b;
+		this.alpha = a;
+	}
+
+	asCSS(){
+		return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
+	}
+
+	equals(color)
+	{
+		if(
+			color.red === this.red &&
+			color.green === this.green &&
+			color.blue === this.blue &&
+			color.alpha === this.alpha)
+		{
+			return true;
+		}
+		return false;
+	}
+}
+
 class Mode
 {
 	constructor(active_layer)
 	{
 		this.active_layer = active_layer;
+		this.fill_color = new Color(255,0,0,255);
+		this.stroke_color = new Color(0,0,0,255);
 	}
 
 	deactivate()
@@ -132,69 +174,126 @@ export class FillMode extends Mode
 		sheet_view.onclick = this._fill.bind(this);
 	}
 
-	_getColorAt(x,y)
+	_getColorAt(color_layer, x,y)
 	{
-		const imgdata = this.context.getImageData(x,y,1,1).data;
-		const color = (imgdata[0]<<24)+(imgdata[1]<<16)+(imgdata[2]<<8)+(imgdata[3]);
-		return color;
+		const index = (y*not_a_sheet.width + x)*4;
+		if(!Number.isInteger(index))
+		{
+			throw("Fuck all");
+		}
+
+		return new Color(
+			color_layer.data[index+0],
+			color_layer.data[index+1],
+			color_layer.data[index+2],
+			color_layer.data[index+3]
+		);
 	}
 
 	_fill(e)
 	{
-		const [x, y] = absoluteToCanvas(e.clientX,e.clientY);
-		const old_color = this._getColorAt(x,y)
-		console.log("BEGIN");
-		this._fillr(x,y, old_color);
-	}
+		let [start_x, start_y] = absoluteToCanvas(e.clientX,e.clientY);
+		start_x = Math.round(start_x);
+		start_y = Math.round(start_y);
 
-	async sleep(ms) {
-	  return new Promise(resolve => setTimeout(resolve, ms));
-	}
+		const color_layer = this.context.getImageData(0,0,not_a_sheet.width,not_a_sheet.height);
+		const old_color = this._getColorAt(color_layer, start_x,start_y)
 
-	_fillr(x,y, old_color)
-	{
-		const thiscolor = this._getColorAt(x,y);
-		if(thiscolor != old_color)
-			return;
-
-		const queue = [];
-		queue.push([x,y]);
-
-		let c=0;
-		while(queue.length != 0)
+		// Sanity check
+		if(old_color.equals(this.fill_color))
 		{
-			const node = queue.shift();
-			c++;
-			let w = node[0];
-			let e = node[0];
-			while(w> 0 && this._getColorAt(w, node[1]) === old_color)
-				w--;
-			while(e< not_a_sheet.width-1 && this._getColorAt(e,node[1]) === old_color)
-			{
-				e++;
-			}
-
-			if(node[1]>0 && node[1]<not_a_sheet.height-1)
-			{
-				let last_north_is_old=false;
-				let last_south_is_old=false;
-				for(let i=w+1;i<e;i++)
-				{
-					let north_is_old = 
-						this._getColorAt(i, node[1]-1) == old_color;
-					let south_is_old =
-						this._getColorAt(i, node[1]+1) == old_color;
-					if(north_is_old && !last_north_is_old)
-						queue.push([i, node[1]-1]);
-					if(south_is_old && !last_south_is_old)
-						queue.push([i, node[1]+1]);
-					last_north_is_old = north_is_old;
-					last_south_is_old = south_is_old;
-				}
-			}
-			this.context.fillRect(w,node[1],e-w,1);
+			return;
 		}
-		console.log(c);
-		console.log("END");
+
+		const canvas_width = not_a_sheet.width;
+		const canvas_height = not_a_sheet.height;
+		
+		const stack = [[start_x, start_y]];
+
+		while(stack.length)
+		{
+			const new_position = stack.pop();
+			let x = new_position[0];
+			let y = new_position[1];
+
+			let pixel_index = (y*canvas_width + x) *4;
+			while(y-- >= 0 && this.matchStartColor(color_layer, pixel_index, old_color))
+			{
+				pixel_index -= canvas_width * 4;
+			}
+			pixel_index += canvas_width * 4;
+			y++;
+
+			let reach_left = false;
+			let reach_right = false;
+
+			while(y++ < canvas_height - 1 && this.matchStartColor(color_layer, pixel_index, old_color))
+			{
+				this.colorPixel(color_layer, pixel_index);
+				
+				if(x>0)
+				{
+					if(this.matchStartColor(color_layer, pixel_index - 4, old_color))
+					{
+						if(!reach_left)
+						{
+							stack.push([x-1,y]);
+							reach_left = true;
+						}
+					}
+					else if(reach_left)
+					{
+						reach_left = false;
+					}
+				}
+
+				if(x< canvas_width - 1)
+				{
+					if(this.matchStartColor(color_layer, pixel_index + 4, old_color))
+					{
+						if(!reach_right)
+						{
+							stack.push([x+1,y]);
+							reach_right = true;
+						}
+					}
+					else if(reach_right)
+					{
+						reach_right = false;
+					}
+				}
+
+				pixel_index += canvas_width * 4;
+			}
+		}
+
+		this.context.putImageData(color_layer, 0, 0);
 	}
+
+	matchStartColor(color_layer, pixel_index, old_color)
+	{
+		const red = color_layer.data[pixel_index];
+		const green = color_layer.data[pixel_index+1];
+		const blue = color_layer.data[pixel_index+2];
+		const alpha = color_layer.data[pixel_index+3];
+		if(red == old_color.red &&
+			green == old_color.green &&
+			blue == old_color.blue &&
+			alpha == old_color.alpha
+		)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	colorPixel(color_layer, pixel_index)
+	{
+		color_layer.data[pixel_index] = this.fill_color.red;
+		color_layer.data[pixel_index+1] = this.fill_color.green;
+		color_layer.data[pixel_index+2] = this.fill_color.blue;
+		color_layer.data[pixel_index+3] = this.fill_color.alpha;
+	}
+
+
 }
