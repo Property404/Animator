@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="description" content="Simple online 2D animation program">
 	<meta name="author" content="Dagan Martinez">
 	<meta name="referrer" content="same-origin">
@@ -30,7 +31,11 @@
 		<canvas id="sheet-template" class="sheet" width="800" height="600"></canvas>
 
 		<div id="keyframe-template" class="keyframe">
-			&deg;
+			<div>&deg;</div>
+			<div class="keyframe-right-side keyframe-side">
+			</div>
+			<div class="keyframe-left-side keyframe-side">
+			</div>
 		</div>
 
 		<div id="keyframe-set-template" class="keyframe-set" hidden>

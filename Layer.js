@@ -19,6 +19,45 @@ class Keyframe
 				action_keyframe_select_callback.
 					call(this);
 		}
+
+		this._right_side = this._element.querySelector(".keyframe-right-side");
+		this._right_side.onmousedown = this._start_resize.bind(this);
+		this._right_side.onclick = e=>console.log("fart");
+
+	}
+
+	_start_resize(e)
+	{
+		console.log("START resizing");
+		this._right_side.onmousedown = null;
+		document.onmouseup = this._stop_resize.bind(this);
+		document.onmousemove = this._resize.bind(this);
+
+		const box = this._right_side.getBoundingClientRect();
+		this._unit_width = window.getComputedStyle(this._element).width.replace("px","")/this._length;
+		this._old_x = box.right;
+		this._old_length = this._length;
+		console.log(this._unit_width);
+		console.log(this._old_x);
+	}
+
+	_resize(e)
+	{
+		console.log("RESISZE");
+		const diff = (e.clientX - this._old_x)/this._unit_width;
+		if(Math.floor(diff) != 0)
+		{
+			console.log(diff);
+			this.length = this._old_length + Math.floor(diff);
+		}
+	}
+
+	_stop_resize(e)
+	{
+		console.log("STOP resizing");
+		this._right_side.onmousedown = this._start_resize.bind(this);
+		document.onmouseup = null;
+		document.onmousemove = null;
 	}
 
 	get slot()
@@ -29,6 +68,20 @@ class Keyframe
 	get length()
 	{
 		return this._length;
+	}
+
+	set length(new_length)
+	{
+		if(new_length < 1 || new_length ===undefined || new_length === null)
+		{
+			throw new Error("Invalid length for keframe");
+		}
+
+		const width = new_length/this._length * window.getComputedStyle(this._element).width.replace("px","");
+		console.log("width: "+width);
+		this._element.style.width = width+"px";
+
+		this._length = new_length;
 	}
 
 	load(canvas)
@@ -174,6 +227,7 @@ export class Layer
 	{
 		const kf = new Keyframe(this);
 		this._keyframes.push(kf);
+		kf.length = 1;
 		return kf;
 	}
 
